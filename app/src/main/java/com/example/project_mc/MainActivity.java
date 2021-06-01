@@ -61,7 +61,7 @@ public class MainActivity extends AppCompatActivity {
                 else{
                     Toast.makeText(this,"Welcome back user",Toast.LENGTH_SHORT).show();
                 }
-                Intent intent = new Intent(this,ProfileActivity.class);
+                Intent intent = new Intent(this,ChatRooms.class);
                 startActivity(intent);
                 this.finish();
             }

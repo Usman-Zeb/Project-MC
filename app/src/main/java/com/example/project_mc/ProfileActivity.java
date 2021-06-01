@@ -29,14 +29,16 @@ public class ProfileActivity extends AppCompatActivity {
     private GoogleSignInOptions gso;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+        super.onCreate(savedInstanceState);
+
+       /* gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.default_web_client_id))
                 .requestEmail()
                 .build();
         mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
         firebaseAuth = FirebaseAuth.getInstance();
         user = firebaseAuth.getCurrentUser();
-        super.onCreate(savedInstanceState);
+
         final Intent logOutintent = new Intent(this,MainActivity.class);
         setContentView(R.layout.activity_profile);
         nameView = findViewById(R.id.nameView);
@@ -53,7 +55,7 @@ public class ProfileActivity extends AppCompatActivity {
                 }
         );
         nameView.setText(user.getDisplayName());
-        Picasso.get().load(user.getPhotoUrl()).into(profilePic);
+        Picasso.get().load(user.getPhotoUrl()).into(profilePic);*/
     }
     private void signOut() {
         // Firebase sign out

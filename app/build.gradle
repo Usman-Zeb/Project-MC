@@ -10,6 +10,7 @@ android {
         targetSdkVersion 30
         versionCode 1
         versionName "1.0"
+        multiDexEnabled true
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -37,5 +38,13 @@ dependencies {
     implementation 'com.google.firebase:firebase-analytics'
     implementation 'com.firebaseui:firebase-ui-auth:6.4.0'
     implementation 'com.squareup.picasso:picasso:2.71828'
+    implementation 'com.github.stfalcon-studio:Chatkit:0.4.1'
+    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
+    implementation 'com.google.firebase:firebase-messaging'
+    implementation 'com.google.firebase:firebase-analytics'
+    implementation "androidx.recyclerview:recyclerview:1.2.0"
+    implementation 'com.google.firebase:firebase-firestore'
+    implementation 'com.android.support:multidex:1.0.3'
+
 
 }
