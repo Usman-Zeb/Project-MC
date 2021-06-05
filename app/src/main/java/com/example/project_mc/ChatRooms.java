@@ -60,7 +60,9 @@ public class ChatRooms extends AppCompatActivity {
     ArrayList<ChatDialog> chats = new ArrayList<>();
     DialogsList dialogList;
     DialogsListAdapter dialogsListAdapter;
-
+    User currentUser = new User();
+    ChatDialog chatDialog = new ChatDialog();
+    private FirebaseFirestore db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,7 +77,9 @@ public class ChatRooms extends AppCompatActivity {
         mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
         firebaseAuth = FirebaseAuth.getInstance();
         user = firebaseAuth.getCurrentUser();
-
+        currentUser.name= user.getDisplayName();
+        currentUser.avatar=user.getPhotoUrl().toString();
+        currentUser.id=user.getUid();
 
         dialogList = (DialogsList) findViewById(R.id.chats_list);
 
@@ -88,23 +92,9 @@ public class ChatRooms extends AppCompatActivity {
         });
 
         dialogList.setAdapter(dialogsListAdapter);
-        /*User user = new User();
-        user.avatar="https://randomuser.me/api/portraits/men/68.jpg";
-        user.id="123";
-        user.name="Hello bro";
-        ArrayList<User> users = new ArrayList<>();
-        users.add(user);*/
 
-        ChatDialog chatDialog = new ChatDialog();
-        chatDialog.id="123";
-        chatDialog.dialogName = "First Message";
-        chatDialog.dialogPhoto= "https://randomuser.me/api/portraits/men/68.jpg";
-        chatDialog.unreadCount=0;
-       //chatDialog.users=users;
 
-        dialogsListAdapter.addItem(chatDialog);
 
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
         FloatingActionButton floatingActionButton = findViewById(R.id.create_chat_btn);
 
         floatingActionButton.setOnClickListener(new View.OnClickListener() {
@@ -115,13 +105,24 @@ public class ChatRooms extends AppCompatActivity {
             }
         });
 
-        /*Map<String, Object> user = new HashMap<>();
-        user.put("first", "Ada");
-        user.put("last", "Lovelace");
-        user.put("born", 1815);*/
 
-        /*db.collection("users")
-                .add(user)
+    }
+
+    private void createChat(String chat_name){
+        //final TextView Group_Image = new TextView(ChatRooms.this);
+        //Group_Image.setText();
+        chatDialog.dialogName=chat_name;
+        chatDialog.dialogPhoto= firebaseAuth.getCurrentUser().getPhotoUrl().toString();
+        chatDialog.unreadCount=0;
+        chatDialog.lastMessage=null;
+        chatDialog.users.add(currentUser);
+        chatDialog.id=chat_name + "_id";
+        dialogsListAdapter.addItem(chatDialog);
+
+        db = FirebaseFirestore.getInstance();
+
+        db.collection("Groups")
+                .add(chatDialog.hashMap())
                 .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                     @Override
                     public void onSuccess(DocumentReference documentReference) {
@@ -133,26 +134,7 @@ public class ChatRooms extends AppCompatActivity {
                     public void onFailure(@NonNull Exception e) {
                         Log.w(TAG, "Error adding document", e);
                     }
-                });*/
-
-        //dialogsListAdapter.addItem(chatDialog);
-
-       /* logoutButton = findViewById(R.id.button_chats_logout);
-        logoutButton.setOnClickListener(
-                new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        signOut();
-                        startActivity(logOutintent);
-                        finish();
-                    }
-                }
-        );*/
-
-    }
-
-    private void createChat(){
-
+                });
     }
 
     private void showChatDialog(){
@@ -176,19 +158,23 @@ public class ChatRooms extends AppCompatActivity {
         View mView = getLayoutInflater().inflate(R.layout.gc_dialog, null);
         final EditText mCreateGC = (EditText) mView.findViewById(R.id.group_name_dialog);
         Button mCreate = (Button) mView.findViewById(R.id.gc_btn_dialog);
+
+
+        mBuilder.setView(mView);
+        AlertDialog dialog = mBuilder.create();
+        dialog.show();
+
         mCreate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if(!mCreate.getText().toString().isEmpty())
                 {
                     Toast.makeText(ChatRooms.this, "Group Chat created", Toast.LENGTH_SHORT).show();
+                    dialog.hide();
+                    createChat(mCreateGC.getText().toString());
                 }
             }
         });
-
-        mBuilder.setView(mView);
-        AlertDialog dialog = mBuilder.create();
-        dialog.show();
     }
 
 

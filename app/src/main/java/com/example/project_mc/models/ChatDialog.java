@@ -5,6 +5,8 @@ import com.stfalcon.chatkit.commons.models.IMessage;
 import com.stfalcon.chatkit.commons.models.IUser;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ChatDialog implements IDialog {
     public  String id;
@@ -47,5 +49,17 @@ public class ChatDialog implements IDialog {
     @Override
     public int getUnreadCount() {
         return unreadCount;
+    }
+
+    public Map<String, Object> hashMap(){
+        Map<String, Object> hashMap = new HashMap<>();
+        hashMap.put("id", id);
+        hashMap.put("dialogName", dialogName);
+        hashMap.put("dialogPhoto", dialogPhoto);
+        hashMap.put("users",users);
+        hashMap.put("lastMessage", lastMessage);
+        hashMap.put("unreadCount", unreadCount);
+
+        return hashMap;
     }
 }
