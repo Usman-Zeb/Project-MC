@@ -9,12 +9,16 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.project_mc.models.ChatDialog;
 import com.example.project_mc.models.User;
@@ -53,6 +57,7 @@ public class ChatRooms extends AppCompatActivity {
     DialogsList dialogList;
     DialogsListAdapter dialogsListAdapter;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -67,7 +72,7 @@ public class ChatRooms extends AppCompatActivity {
         firebaseAuth = FirebaseAuth.getInstance();
         user = firebaseAuth.getCurrentUser();
 
-        final Intent logOutintent = new Intent(this,MainActivity.class);
+
         dialogList = (DialogsList) findViewById(R.id.chats_list);
 
         dialogsListAdapter = new DialogsListAdapter<ChatDialog>(new ImageLoader() {
@@ -91,18 +96,18 @@ public class ChatRooms extends AppCompatActivity {
         chatDialog.dialogName = "First Message";
         chatDialog.dialogPhoto= "https://randomuser.me/api/portraits/men/68.jpg";
         chatDialog.unreadCount=0;
-       // chatDialog.users=users;
+       //chatDialog.users=users;
 
         dialogsListAdapter.addItem(chatDialog);
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
-        Map<String, Object> user = new HashMap<>();
+        /*Map<String, Object> user = new HashMap<>();
         user.put("first", "Ada");
         user.put("last", "Lovelace");
-        user.put("born", 1815);
+        user.put("born", 1815);*/
 
-        db.collection("users")
+        /*db.collection("users")
                 .add(user)
                 .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                     @Override
@@ -115,7 +120,7 @@ public class ChatRooms extends AppCompatActivity {
                     public void onFailure(@NonNull Exception e) {
                         Log.w(TAG, "Error adding document", e);
                     }
-                });
+                });*/
 
         //dialogsListAdapter.addItem(chatDialog);
 
@@ -133,22 +138,6 @@ public class ChatRooms extends AppCompatActivity {
 
     }
 
-    @Nullable
-    @Override
-    public View onCreateView(@NonNull String name, @NonNull Context context, @NonNull AttributeSet attrs) {
-
-        View view = super.onCreateView(name, context, attrs);
-
-       /*ChatDialog chatDialog = new ChatDialog();
-        chatDialog.id="123";
-        chatDialog.dialogName = "First Message";
-        chatDialog.dialogPhoto= "";
-        chatDialog.unreadCount=0;
-
-        dialogsListAdapter.addItem(chatDialog);*/
-
-        return view;
-    }
 
     private void signOut() {
         // Firebase sign out
@@ -164,5 +153,28 @@ public class ChatRooms extends AppCompatActivity {
                 });
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
 
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+
+        switch (item.getItemId())
+        {
+            case R.id.item1:
+                Toast.makeText(this, "Logged out", Toast.LENGTH_SHORT).show();
+                final Intent logOutintent = new Intent(this,MainActivity.class);
+                signOut();
+                startActivity(logOutintent);
+                finish();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
 }
