@@ -4,6 +4,8 @@ import com.stfalcon.chatkit.commons.models.IMessage;
 import com.stfalcon.chatkit.commons.models.IUser;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Message implements IMessage {
 
@@ -30,5 +32,14 @@ public class Message implements IMessage {
     @Override
     public Date getCreatedAt() {
         return createdAt;
+    }
+
+    public Map<String, Object> hashMap(){
+        Map<String, Object> hashMap = new HashMap<>();
+        hashMap.put("text", text);
+        hashMap.put("id", id);
+        hashMap.put("author",author);
+        hashMap.put("createdAt", createdAt);
+        return hashMap;
     }
 }

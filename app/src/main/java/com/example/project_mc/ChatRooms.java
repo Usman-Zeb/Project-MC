@@ -2,9 +2,11 @@ package com.example.project_mc;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.AttributeSet;
@@ -16,6 +18,7 @@ import android.view.View;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -29,6 +32,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
@@ -101,6 +105,15 @@ public class ChatRooms extends AppCompatActivity {
         dialogsListAdapter.addItem(chatDialog);
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
+        FloatingActionButton floatingActionButton = findViewById(R.id.create_chat_btn);
+
+        floatingActionButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showChatDialog();
+                Log.d("Button", "Is this working?");
+            }
+        });
 
         /*Map<String, Object> user = new HashMap<>();
         user.put("first", "Ada");
@@ -136,6 +149,46 @@ public class ChatRooms extends AppCompatActivity {
                 }
         );*/
 
+    }
+
+    private void createChat(){
+
+    }
+
+    private void showChatDialog(){
+        /*final EditText editText = new EditText(ChatRooms.this);
+        AlertDialog dialog = new AlertDialog.Builder(ChatRooms.this)
+                .setTitle("Create a Group")
+                .setMessage("Enter Group Name")
+                .setView(editText)
+                .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                    }
+                })
+                .setNegativeButton("Cancel", null)
+                .create();
+        dialog.show();*/
+
+        //Custom Alert Dialog
+        AlertDialog.Builder mBuilder = new AlertDialog.Builder(ChatRooms.this);
+        View mView = getLayoutInflater().inflate(R.layout.gc_dialog, null);
+        final EditText mCreateGC = (EditText) mView.findViewById(R.id.group_name_dialog);
+        Button mCreate = (Button) mView.findViewById(R.id.gc_btn_dialog);
+        mCreate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(!mCreate.getText().toString().isEmpty())
+                {
+                    Toast.makeText(ChatRooms.this, "Group Chat created", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
+        mBuilder.setView(mView);
+        AlertDialog dialog = mBuilder.create();
+        dialog.show();
     }
 
 
