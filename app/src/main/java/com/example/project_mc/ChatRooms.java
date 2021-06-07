@@ -5,6 +5,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -24,6 +25,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.project_mc.models.ChatDialog;
+import com.example.project_mc.models.Message;
 import com.example.project_mc.models.User;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -35,10 +37,14 @@ import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.squareup.picasso.Picasso;
 import com.stfalcon.chatkit.commons.ImageLoader;
+import com.stfalcon.chatkit.commons.models.IDialog;
 import com.stfalcon.chatkit.commons.models.IUser;
 import com.stfalcon.chatkit.dialogs.DialogsList;
 import com.stfalcon.chatkit.dialogs.DialogsListAdapter;
@@ -78,7 +84,7 @@ public class ChatRooms extends AppCompatActivity {
         firebaseAuth = FirebaseAuth.getInstance();
         user = firebaseAuth.getCurrentUser();
         currentUser.name= user.getDisplayName();
-        currentUser.avatar=user.getPhotoUrl().toString();
+        //currentUser.avatar=user.getPhotoUrl().toString();
         currentUser.id=user.getUid();
 
         dialogList = (DialogsList) findViewById(R.id.chats_list);
@@ -105,6 +111,59 @@ public class ChatRooms extends AppCompatActivity {
             }
         });
 
+        db = FirebaseFirestore.getInstance();
+        ArrayList<ChatDialog> init_groups = new ArrayList<>();
+        db.collection("Groups")
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if(task.isSuccessful()){
+                            ArrayList<Map<String, Object>> data =  new ArrayList<>();
+                            for (QueryDocumentSnapshot document: task.getResult()){
+                                data.add(document.getData());
+                                //Log.d("THe DATA:", document.getId() + " => " + data + "\n");
+                                /*chatDialog.dialogPhoto= data.get("dialogPhoto").toString();
+                                chatDialog.id= data.get("id").toString();
+                                chatDialog.dialogName= data.get("dialogName").toString();
+                                chatDialog.users = (ArrayList<User>) data.get("users");
+                                //chatDialog.unreadCount = (int) data.get("unreadCount");
+                                chatDialog.lastMessage = (Message) data.get("lastMessage");
+                                dialogsListAdapter.addItem(chatDialog);*/
+                            }
+
+
+                            for (Map<String, Object> singleData: data)
+                            {
+                                ChatDialog chatDialog = new ChatDialog();
+                                Log.d("Data Name: ", singleData.get("dialogName").toString() + "\n");
+                                chatDialog.dialogPhoto= singleData.get("dialogPhoto").toString();
+                                chatDialog.id= singleData.get("id").toString();
+                                chatDialog.dialogName= singleData.get("dialogName").toString();
+                                chatDialog.users = (ArrayList<User>) singleData.get("users");
+                                //chatDialog.unreadCount = (int) singleData.get("unreadCount");
+                                chatDialog.lastMessage = (Message) singleData.get("lastMessage");
+                                init_groups.add(chatDialog);
+
+
+                            }
+
+
+                        }
+                        dialogsListAdapter.setItems(init_groups);
+                    }
+
+                });
+
+
+        dialogsListAdapter.setOnDialogClickListener(new DialogsListAdapter.OnDialogClickListener() {
+            @Override
+            public void onDialogClick(IDialog dialog) {
+                Intent intent = new Intent(ChatRooms.this,  ChatActivity.class);
+                startActivity(intent);
+            }
+
+        });
 
     }
 
@@ -112,14 +171,15 @@ public class ChatRooms extends AppCompatActivity {
         //final TextView Group_Image = new TextView(ChatRooms.this);
         //Group_Image.setText();
         chatDialog.dialogName=chat_name;
-        chatDialog.dialogPhoto= firebaseAuth.getCurrentUser().getPhotoUrl().toString();
+        //chatDialog.dialogPhoto= firebaseAuth.getCurrentUser().getPhotoUrl().toString();
+        chatDialog.dialogPhoto= "https://www.google.com/url?sa=i&url=https%3A%2F%2Fsupport.microsoft.com%2Fen-us%2Fwhats-new&psig=AOvVaw2UOk2vjnavAaF8efhdZ-1J&ust=1623157318147000&source=images&cd=vfe&ved=0CAIQjRxqFwoTCJDZ2K3KhfECFQAAAAAdAAAAABAD";
         chatDialog.unreadCount=0;
         chatDialog.lastMessage=null;
         chatDialog.users.add(currentUser);
         chatDialog.id=chat_name + "_id";
         dialogsListAdapter.addItem(chatDialog);
 
-        db = FirebaseFirestore.getInstance();
+
 
         db.collection("Groups")
                 .add(chatDialog.hashMap())

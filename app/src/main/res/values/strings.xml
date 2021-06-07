@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">GoChat - MC Project</string>
+    <string name="hint_enter_a_message">Type here</string>
 </resources>
