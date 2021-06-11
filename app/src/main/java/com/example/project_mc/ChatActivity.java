@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -24,6 +25,7 @@ import com.stfalcon.chatkit.commons.ImageLoader;
 import com.stfalcon.chatkit.commons.models.IUser;
 import com.stfalcon.chatkit.dialogs.DialogsList;
 import com.stfalcon.chatkit.dialogs.DialogsListAdapter;
+import com.stfalcon.chatkit.messages.MessageInput;
 import com.stfalcon.chatkit.messages.MessagesList;
 import com.stfalcon.chatkit.messages.MessagesListAdapter;
 
@@ -44,6 +46,7 @@ public class ChatActivity extends AppCompatActivity {
     User currentUser = new User();
     Message message = new Message();
     private FirebaseFirestore db;
+    MessageInput inputView;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -56,8 +59,8 @@ public class ChatActivity extends AppCompatActivity {
 
         messagesList = (MessagesList) findViewById(R.id.messagesList);
 
-        messagesListAdapter = new MessagesListAdapter<Message>("x134HNzH5IQMLUuXjPyTiHw87zd2", null);
-
+        messagesListAdapter = new MessagesListAdapter<Message>(firebaseAuth.getUid().toString(), null);
+        inputView = findViewById(R.id.input);
         messagesList.setAdapter(messagesListAdapter);
         db = FirebaseFirestore.getInstance();
         ArrayList<Message> init_messages = new ArrayList<Message>();
@@ -74,7 +77,7 @@ public class ChatActivity extends AppCompatActivity {
                             Message message = new Message();
                             Log.d("Data Name: ", singleData.get("id").toString() + "\n");
                             message.id = singleData.get("id").toString();
-                            message.setAuthor((HashMap<String,Object>) singleData.get("user"));
+                            message.setAuthor((HashMap<String,Object>) singleData.get("author"));
                             message.text = singleData.get("text").toString();
                             message.createdAt =  new Date();
                             init_messages.add(message);
@@ -83,5 +86,22 @@ public class ChatActivity extends AppCompatActivity {
                     }
                 }
         );
+        inputView.setInputListener(new MessageInput.InputListener() {
+            @Override
+            public boolean onSubmit(CharSequence input) {
+                Message newMessage =  new Message();
+                newMessage.createdAt = new Date();
+                newMessage.text = input.toString();
+                newMessage.id = "newMessage";
+                HashMap<String,Object> currentUser = new HashMap<String,Object>();
+                currentUser.put("id",firebaseAuth.getUid());
+                currentUser.put("avatar","https://www.google.com/url?sa=i&url=https%3A%2F%2Fsupport.microsoft.com%2Fen-us%2Fwhats-new&psig=AOvVaw2UOk2vjnavAaF8efhdZ-1J&ust=1623157318147000&source=images&cd=vfe&ved=0CAIQjRxqFwoTCJDZ2K3KhfECFQAAAAAdAAAAABAD");
+                currentUser.put("name",user.getDisplayName().toString());
+                newMessage.setAuthor(currentUser);
+                db.collection("Groups").document("AyV8rltUSQNXduBhmEyN").collection("messages").add(newMessage.hashMap());
+                messagesListAdapter.addToStart(newMessage,true);
+                return true;
+            }
+        });
 }
 }
