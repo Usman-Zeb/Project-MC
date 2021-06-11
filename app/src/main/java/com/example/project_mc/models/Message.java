@@ -52,4 +52,8 @@ public class Message implements IMessage {
         this.author.avatar = data.get("avatar").toString();
         this.author.name = data.get("name").toString();
     }
+
+    public <T> Comparable<T> getDateTime() {
+        return (Comparable<T>) this.createdAt;
+    }
 }

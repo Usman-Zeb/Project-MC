@@ -17,7 +17,11 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.squareup.picasso.Picasso;
@@ -30,8 +34,12 @@ import com.stfalcon.chatkit.messages.MessagesList;
 import com.stfalcon.chatkit.messages.MessagesListAdapter;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class ChatActivity extends AppCompatActivity {
@@ -45,6 +53,7 @@ public class ChatActivity extends AppCompatActivity {
     MessagesListAdapter messagesListAdapter;
     User currentUser = new User();
     Message message = new Message();
+    ArrayList<Message> init_messages = new ArrayList<Message>();
     private FirebaseFirestore db;
     MessageInput inputView;
     @Override
@@ -63,29 +72,8 @@ public class ChatActivity extends AppCompatActivity {
         inputView = findViewById(R.id.input);
         messagesList.setAdapter(messagesListAdapter);
         db = FirebaseFirestore.getInstance();
-        ArrayList<Message> init_messages = new ArrayList<Message>();
-        db.collection("Groups").document("AyV8rltUSQNXduBhmEyN").collection("messages").get().addOnCompleteListener(
-                new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        ArrayList<Map<String, Object>> data =  new ArrayList<>();
-                        for (QueryDocumentSnapshot document: task.getResult()){
-                            data.add(document.getData());
-                        }
-                        for (Map<String, Object> singleData: data)
-                        {
-                            Message message = new Message();
-                            Log.d("Data Name: ", singleData.get("id").toString() + "\n");
-                            message.id = singleData.get("id").toString();
-                            message.setAuthor((HashMap<String,Object>) singleData.get("author"));
-                            message.text = singleData.get("text").toString();
-                            message.createdAt =  new Date();
-                            init_messages.add(message);
-                        }
-                        messagesListAdapter.addToEnd(init_messages,false);
-                    }
-                }
-        );
+
+
         inputView.setInputListener(new MessageInput.InputListener() {
             @Override
             public boolean onSubmit(CharSequence input) {
@@ -99,9 +87,46 @@ public class ChatActivity extends AppCompatActivity {
                 currentUser.put("name",user.getDisplayName().toString());
                 newMessage.setAuthor(currentUser);
                 db.collection("Groups").document("AyV8rltUSQNXduBhmEyN").collection("messages").add(newMessage.hashMap());
-                messagesListAdapter.addToStart(newMessage,true);
+                //messagesListAdapter.addToStart(newMessage,true);
                 return true;
             }
         });
 }
-}
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        CollectionReference messageRef = db.collection("Groups").document("AyV8rltUSQNXduBhmEyN").collection("messages");
+        messageRef.addSnapshotListener(new EventListener<QuerySnapshot>() {
+            @Override
+            public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
+                if (error != null) {
+                    System.err.println("Listen failed:" + error);
+                    return;
+                }
+                init_messages = new ArrayList<Message>();
+                for (DocumentSnapshot doc : value) {
+                    {
+                        Map<String, Object> newData = doc.getData();
+                        Message message = new Message();
+                        Log.d("Data Name: ", newData.get("id").toString() + "\n");
+                        message.id = newData.get("id").toString();
+                        message.setAuthor((HashMap<String,Object>) newData.get("author"));
+                        message.text = newData.get("text").toString();
+                        message.createdAt =  doc.getTimestamp("createdAt").toDate();
+                        init_messages.add(message);
+                    }
+                }
+                Collections.sort(init_messages, new Comparator<Message>() {
+                    @Override
+                    public int compare(Message message, Message t1) {
+                        return message.getDateTime().compareTo(t1.getDateTime());
+                    }
+
+                });
+                messagesListAdapter.clear();
+                messagesListAdapter.addToEnd(init_messages, true);
+            }
+            });
+        }
+    }

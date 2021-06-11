@@ -31,7 +31,7 @@ public class ProfileActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-       /* gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+       gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.default_web_client_id))
                 .requestEmail()
                 .build();
@@ -55,7 +55,7 @@ public class ProfileActivity extends AppCompatActivity {
                 }
         );
         nameView.setText(user.getDisplayName());
-        Picasso.get().load(user.getPhotoUrl()).into(profilePic);*/
+        Picasso.get().load(user.getPhotoUrl()).into(profilePic);
     }
     private void signOut() {
         // Firebase sign out

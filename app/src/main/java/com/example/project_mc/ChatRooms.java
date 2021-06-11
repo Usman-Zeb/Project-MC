@@ -61,6 +61,7 @@ public class ChatRooms extends AppCompatActivity {
     TextView nameView;
     ImageView profilePic;
     Button logoutButton;
+    FloatingActionButton profileButton;
     private GoogleSignInClient mGoogleSignInClient;
     private GoogleSignInOptions gso;
     ArrayList<ChatDialog> chats = new ArrayList<>();
@@ -75,7 +76,7 @@ public class ChatRooms extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat_rooms);
 
-
+        profileButton = findViewById(R.id.profile_button);
         gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.default_web_client_id))
                 .requestEmail()
@@ -108,6 +109,13 @@ public class ChatRooms extends AppCompatActivity {
             public void onClick(View v) {
                 showChatDialog();
                 Log.d("Button", "Is this working?");
+            }
+        });
+        profileButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(ChatRooms.this,  ProfileActivity.class);
+                startActivity(intent);
             }
         });
 
