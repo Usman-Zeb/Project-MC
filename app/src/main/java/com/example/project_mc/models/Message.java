@@ -1,5 +1,7 @@
 package com.example.project_mc.models;
 
+import android.util.Log;
+
 import com.stfalcon.chatkit.commons.models.IMessage;
 import com.stfalcon.chatkit.commons.models.IUser;
 
@@ -11,8 +13,8 @@ public class Message implements IMessage {
 
     public String id;
     public String text;
-    public IUser author;
-    public Date createdAt;
+    public User author = new User();
+    public Date createdAt = new Date();
 
     @Override
     public String getId() {
@@ -25,7 +27,7 @@ public class Message implements IMessage {
     }
 
     @Override
-    public IUser getUser() {
+    public User getUser() {
         return author;
     }
 
@@ -41,5 +43,13 @@ public class Message implements IMessage {
         hashMap.put("author",author);
         hashMap.put("createdAt", createdAt);
         return hashMap;
+    }
+
+    public void setAuthor(HashMap<String,Object> data)
+    {
+        Log.d("SHOW THIS BITCH", data.get("id").toString());
+        this.author.id = data.get("id").toString();
+        this.author.avatar = data.get("avatar").toString();
+        this.author.name = data.get("name").toString();
     }
 }

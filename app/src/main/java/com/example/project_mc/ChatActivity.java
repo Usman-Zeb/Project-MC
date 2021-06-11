@@ -29,6 +29,7 @@ import com.stfalcon.chatkit.messages.MessagesListAdapter;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 
 public class ChatActivity extends AppCompatActivity {
@@ -73,9 +74,9 @@ public class ChatActivity extends AppCompatActivity {
                             Message message = new Message();
                             Log.d("Data Name: ", singleData.get("id").toString() + "\n");
                             message.id = singleData.get("id").toString();
-                            message.author = (IUser) singleData.get("user");
+                            message.setAuthor((HashMap<String,Object>) singleData.get("user"));
                             message.text = singleData.get("text").toString();
-                            message.createdAt = new Date();
+                            message.createdAt =  new Date();
                             init_messages.add(message);
                         }
                         messagesListAdapter.addToEnd(init_messages,false);
