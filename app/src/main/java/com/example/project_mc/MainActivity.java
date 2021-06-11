@@ -26,14 +26,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        button = findViewById(R.id.loginRegister);
-        button.setOnClickListener(
-                new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        handleLoginRegister();
-                    }
-                });
+        //button = findViewById(R.id.loginRegister);
+        handleLoginRegister();
+
     }
 
     public void handleLoginRegister(){

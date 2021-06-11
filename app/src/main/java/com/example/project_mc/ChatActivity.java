@@ -55,6 +55,7 @@ public class ChatActivity extends AppCompatActivity {
     Message message = new Message();
     ArrayList<Message> init_messages = new ArrayList<Message>();
     private FirebaseFirestore db;
+    String group_id;
     MessageInput inputView;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,6 +66,9 @@ public class ChatActivity extends AppCompatActivity {
         currentUser.name= user.getDisplayName();
         //currentUser.avatar=user.getPhotoUrl().toString();
         currentUser.id=user.getUid();
+
+        group_id = getIntent().getStringExtra("Group_ID");
+        Log.d("This is my ID: ", group_id);
 
         messagesList = (MessagesList) findViewById(R.id.messagesList);
 
@@ -83,10 +87,17 @@ public class ChatActivity extends AppCompatActivity {
                 newMessage.id = "newMessage";
                 HashMap<String,Object> currentUser = new HashMap<String,Object>();
                 currentUser.put("id",firebaseAuth.getUid());
-                currentUser.put("avatar","https://www.google.com/url?sa=i&url=https%3A%2F%2Fsupport.microsoft.com%2Fen-us%2Fwhats-new&psig=AOvVaw2UOk2vjnavAaF8efhdZ-1J&ust=1623157318147000&source=images&cd=vfe&ved=0CAIQjRxqFwoTCJDZ2K3KhfECFQAAAAAdAAAAABAD");
+                if(firebaseAuth.getCurrentUser().getPhotoUrl() == null){
+
+                    currentUser.put("avatar", "https://www.google.com.pk/url?sa=i&url=https%3A%2F%2Fcommons.wikimedia.org%2Fwiki%2FFile%3AMicrosoft_logo.svg&psig=AOvVaw3PrWg1jza_UoiOaOIkRo3u&ust=1623522034288000&source=images&cd=vfe&ved=0CAIQjRxqFwoTCMCg1oGZkPECFQAAAAAdAAAAABAD");
+                }
+                else{
+                    currentUser.put("avatar", firebaseAuth.getCurrentUser().getPhotoUrl().toString());
+
+                }
                 currentUser.put("name",user.getDisplayName().toString());
                 newMessage.setAuthor(currentUser);
-                db.collection("Groups").document("AyV8rltUSQNXduBhmEyN").collection("messages").add(newMessage.hashMap());
+                db.collection("Groups").document(group_id).collection("messages").add(newMessage.hashMap());
                 //messagesListAdapter.addToStart(newMessage,true);
                 return true;
             }
@@ -96,7 +107,7 @@ public class ChatActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        CollectionReference messageRef = db.collection("Groups").document("AyV8rltUSQNXduBhmEyN").collection("messages");
+        CollectionReference messageRef = db.collection("Groups").document(group_id).collection("messages");
         messageRef.addSnapshotListener(new EventListener<QuerySnapshot>() {
             @Override
             public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
@@ -105,27 +116,31 @@ public class ChatActivity extends AppCompatActivity {
                     return;
                 }
                 init_messages = new ArrayList<Message>();
-                for (DocumentSnapshot doc : value) {
-                    {
-                        Map<String, Object> newData = doc.getData();
-                        Message message = new Message();
-                        Log.d("Data Name: ", newData.get("id").toString() + "\n");
-                        message.id = newData.get("id").toString();
-                        message.setAuthor((HashMap<String,Object>) newData.get("author"));
-                        message.text = newData.get("text").toString();
-                        message.createdAt =  doc.getTimestamp("createdAt").toDate();
-                        init_messages.add(message);
+                if (value !=null)
+                {
+                    for (DocumentSnapshot doc : value) {
+                        {
+                            Map<String, Object> newData = doc.getData();
+                            Message message = new Message();
+                            Log.d("Data Name: ", newData.get("id").toString() + "\n");
+                            message.id = newData.get("id").toString();
+                            message.setAuthor((HashMap<String,Object>) newData.get("author"));
+                            message.text = newData.get("text").toString();
+                            message.createdAt =  doc.getTimestamp("createdAt").toDate();
+                            init_messages.add(message);
+                        }
                     }
-                }
-                Collections.sort(init_messages, new Comparator<Message>() {
-                    @Override
-                    public int compare(Message message, Message t1) {
-                        return message.getDateTime().compareTo(t1.getDateTime());
-                    }
+                    Collections.sort(init_messages, new Comparator<Message>() {
+                        @Override
+                        public int compare(Message message, Message t1) {
+                            return message.getDateTime().compareTo(t1.getDateTime());
+                        }
 
-                });
-                messagesListAdapter.clear();
-                messagesListAdapter.addToEnd(init_messages, true);
+                    });
+                    messagesListAdapter.clear();
+                    messagesListAdapter.addToEnd(init_messages, true);
+                }
+
             }
             });
         }

@@ -61,7 +61,6 @@ public class ChatRooms extends AppCompatActivity {
     TextView nameView;
     ImageView profilePic;
     Button logoutButton;
-    FloatingActionButton profileButton;
     private GoogleSignInClient mGoogleSignInClient;
     private GoogleSignInOptions gso;
     ArrayList<ChatDialog> chats = new ArrayList<>();
@@ -75,8 +74,6 @@ public class ChatRooms extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat_rooms);
-
-        profileButton = findViewById(R.id.profile_button);
         gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.default_web_client_id))
                 .requestEmail()
@@ -111,13 +108,7 @@ public class ChatRooms extends AppCompatActivity {
                 Log.d("Button", "Is this working?");
             }
         });
-        profileButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(ChatRooms.this,  ProfileActivity.class);
-                startActivity(intent);
-            }
-        });
+
 
         db = FirebaseFirestore.getInstance();
         ArrayList<ChatDialog> init_groups = new ArrayList<>();
@@ -168,6 +159,7 @@ public class ChatRooms extends AppCompatActivity {
             @Override
             public void onDialogClick(IDialog dialog) {
                 Intent intent = new Intent(ChatRooms.this,  ChatActivity.class);
+                intent.putExtra("Group_ID",dialog.getId());
                 startActivity(intent);
             }
 
@@ -180,16 +172,26 @@ public class ChatRooms extends AppCompatActivity {
         //Group_Image.setText();
         chatDialog.dialogName=chat_name;
         //chatDialog.dialogPhoto= firebaseAuth.getCurrentUser().getPhotoUrl().toString();
-        chatDialog.dialogPhoto= "https://www.google.com/url?sa=i&url=https%3A%2F%2Fsupport.microsoft.com%2Fen-us%2Fwhats-new&psig=AOvVaw2UOk2vjnavAaF8efhdZ-1J&ust=1623157318147000&source=images&cd=vfe&ved=0CAIQjRxqFwoTCJDZ2K3KhfECFQAAAAAdAAAAABAD";
+        String pic;
+        if(firebaseAuth.getCurrentUser().getPhotoUrl() == null){
+
+            chatDialog.dialogPhoto= "https://www.google.com.pk/url?sa=i&url=https%3A%2F%2Fcommons.wikimedia.org%2Fwiki%2FFile%3AMicrosoft_logo.svg&psig=AOvVaw3PrWg1jza_UoiOaOIkRo3u&ust=1623522034288000&source=images&cd=vfe&ved=0CAIQjRxqFwoTCMCg1oGZkPECFQAAAAAdAAAAABAD";
+        }
+        else{
+        chatDialog.dialogPhoto= firebaseAuth.getCurrentUser().getPhotoUrl().toString();}
         chatDialog.unreadCount=0;
         chatDialog.lastMessage=null;
         chatDialog.users.add(currentUser);
-        chatDialog.id=chat_name + "_id";
+
+        DocumentReference reference = db.collection("Groups").document();
+        chatDialog.id = reference.getId();
+        reference.set(chatDialog.hashMap());
+
         dialogsListAdapter.addItem(chatDialog);
 
 
 
-        db.collection("Groups")
+        /*db.collection("Groups")
                 .add(chatDialog.hashMap())
                 .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                     @Override
@@ -202,7 +204,7 @@ public class ChatRooms extends AppCompatActivity {
                     public void onFailure(@NonNull Exception e) {
                         Log.w(TAG, "Error adding document", e);
                     }
-                });
+                });*/
     }
 
     private void showChatDialog(){
