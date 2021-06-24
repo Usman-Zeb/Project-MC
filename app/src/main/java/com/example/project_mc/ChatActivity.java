@@ -12,8 +12,13 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.project_mc.models.ApiClient;
+import com.example.project_mc.models.ApiInterface;
 import com.example.project_mc.models.ChatDialog;
+import com.example.project_mc.models.DataModel;
 import com.example.project_mc.models.Message;
+import com.example.project_mc.models.NotificationModel;
+import com.example.project_mc.models.RootModel;
 import com.example.project_mc.models.User;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -26,6 +31,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.squareup.okhttp.ResponseBody;
 import com.squareup.picasso.Picasso;
 import com.stfalcon.chatkit.commons.ImageLoader;
 import com.stfalcon.chatkit.commons.models.IUser;
@@ -46,6 +52,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import retrofit2.Callback;
+
 public class ChatActivity extends AppCompatActivity {
     private static final String TAG = "Chats List";
     FirebaseUser user;
@@ -61,6 +69,8 @@ public class ChatActivity extends AppCompatActivity {
     private FirebaseFirestore db;
     String group_id;
     MessageInput inputView;
+    Map<String, Object> group;
+    String groupName;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -85,7 +95,18 @@ public class ChatActivity extends AppCompatActivity {
         inputView = findViewById(R.id.input);
         messagesList.setAdapter(messagesListAdapter);
         db = FirebaseFirestore.getInstance();
-
+        db.collection("Groups").document(group_id).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if(task.isSuccessful()){
+                    DocumentSnapshot doc = task.getResult();
+                    if(doc.exists()){
+                        group =  doc.getData();
+                        groupName = (String) group.get("dialogName");
+                    }
+                }
+            }
+        });
 
         TextView typing_view = findViewById(R.id.typing_indicator);
         typing_view.setVisibility(View.INVISIBLE);
@@ -111,6 +132,8 @@ public class ChatActivity extends AppCompatActivity {
                 currentUser.put("name",user.getDisplayName().toString());
                 newMessage.setAuthor(currentUser);
                 db.collection("Groups").document(group_id).collection("messages").add(newMessage.hashMap());
+                String title = user.getDisplayName().toString() + " in " + groupName;
+                sendNotificationToUser("/topics/all",title,newMessage.getText());
                 //messagesListAdapter.addToStart(newMessage,true);
                 return true;
             }
@@ -240,4 +263,22 @@ public class ChatActivity extends AppCompatActivity {
             }
             });
         }
+    private void sendNotificationToUser(String token,String title,String message) {
+        RootModel rootModel = new RootModel(token, new NotificationModel(title, message), new DataModel(title,message));
+
+        ApiInterface apiService =  ApiClient.getClient().create(ApiInterface.class);
+        retrofit2.Call<ResponseBody> responseBodyCall = apiService.sendNotification(rootModel);
+
+        responseBodyCall.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(retrofit2.Call<ResponseBody> call, retrofit2.Response<ResponseBody> response) {
+                Log.d(TAG,"Successfully notification send by using retrofit.");
+            }
+
+            @Override
+            public void onFailure(retrofit2.Call<ResponseBody> call, Throwable t) {
+
+            }
+        });
+    }
     }
