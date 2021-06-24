@@ -103,6 +103,7 @@ public class ChatActivity extends AppCompatActivity {
                     if(doc.exists()){
                         group =  doc.getData();
                         groupName = (String) group.get("dialogName");
+                        getSupportActionBar().setTitle(groupName);
                     }
                 }
             }

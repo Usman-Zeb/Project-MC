@@ -12,6 +12,10 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@+id/input"
+        android:background="@drawable/chatingradient"
+        app:outcomingDefaultBubbleColor="@color/colorPrimary"
+        app:incomingDefaultBubbleColor="@color/colorincoming"
+
         />
 
     <TextView
@@ -32,8 +36,8 @@
         android:layout_marginTop="5dp"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        app:showAttachmentButton="true"
-
+        app:inputButtonDefaultBgPressedColor="@color/colorAccent"
+        app:inputButtonDefaultBgColor="@color/colorPrimary"
         app:inputHint="@string/hint_enter_a_message" />
 
 

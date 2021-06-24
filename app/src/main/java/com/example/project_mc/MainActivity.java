@@ -39,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
                 new AuthUI.IdpConfig.GoogleBuilder().build()
         );
 
-        Intent intent = AuthUI.getInstance().createSignInIntentBuilder().setAvailableProviders(provider).setTosAndPrivacyPolicyUrls("https://google.com","https://google.com").setIsSmartLockEnabled(false).build();
+        Intent intent = AuthUI.getInstance().createSignInIntentBuilder().setAvailableProviders(provider).setTosAndPrivacyPolicyUrls("https://google.com","https://google.com").setIsSmartLockEnabled(false).setLogo(R.drawable.logo).build();
         startActivityForResult(intent,AUTHUI_REQUEST_CODE);
     }
 
