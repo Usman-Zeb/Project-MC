@@ -7,6 +7,9 @@ import android.os.Bundle;
 import android.os.SystemClock;
 import android.view.Window;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+
 public class BoardingScreen extends AppCompatActivity {
 
     @Override
@@ -27,8 +30,21 @@ public class BoardingScreen extends AppCompatActivity {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        Intent intent = new Intent(BoardingScreen.this, MainActivity.class);
+                        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+                        Intent intent;
+                        if(user == null)
+                        {
+                            intent = new Intent(BoardingScreen.this, MainActivity.class);
+                        }
+
+                        else
+                        {
+                            intent = new Intent(BoardingScreen.this, ChatRooms.class);
+                        }
                         startActivity(intent);
+
+                        finish();
+
                     }
                 });
             }

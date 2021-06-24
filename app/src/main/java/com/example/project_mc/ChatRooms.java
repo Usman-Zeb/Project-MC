@@ -81,22 +81,21 @@ public class ChatRooms extends AppCompatActivity {
         mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
         firebaseAuth = FirebaseAuth.getInstance();
         user = firebaseAuth.getCurrentUser();
-        currentUser.name= user.getDisplayName();
+        currentUser.name = user.getDisplayName();
         //currentUser.avatar=user.getPhotoUrl().toString();
-        currentUser.id=user.getUid();
+        currentUser.id = user.getUid();
 
         dialogList = (DialogsList) findViewById(R.id.chats_list);
 
         dialogsListAdapter = new DialogsListAdapter<ChatDialog>(new ImageLoader() {
             @Override
             public void loadImage(ImageView imageView, @Nullable String url, @Nullable Object payload) {
-                if(!url.equals(""))
+                if (!url.equals(""))
                     Picasso.get().load(url).into(imageView);
             }
         });
 
         dialogList.setAdapter(dialogsListAdapter);
-
 
 
         FloatingActionButton floatingActionButton = findViewById(R.id.create_chat_btn);
@@ -117,9 +116,9 @@ public class ChatRooms extends AppCompatActivity {
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if(task.isSuccessful()){
-                            ArrayList<Map<String, Object>> data =  new ArrayList<>();
-                            for (QueryDocumentSnapshot document: task.getResult()){
+                        if (task.isSuccessful()) {
+                            ArrayList<Map<String, Object>> data = new ArrayList<>();
+                            for (QueryDocumentSnapshot document : task.getResult()) {
                                 data.add(document.getData());
                                 //Log.d("THe DATA:", document.getId() + " => " + data + "\n");
                                 /*chatDialog.dialogPhoto= data.get("dialogPhoto").toString();
@@ -132,13 +131,14 @@ public class ChatRooms extends AppCompatActivity {
                             }
 
 
-                            for (Map<String, Object> singleData: data)
-                            {
+                            for (Map<String, Object> singleData : data) {
                                 ChatDialog chatDialog = new ChatDialog();
                                 Log.d("Data Name: ", singleData.get("dialogName").toString() + "\n");
-                                chatDialog.dialogPhoto= singleData.get("dialogPhoto").toString();
-                                chatDialog.id= singleData.get("id").toString();
-                                chatDialog.dialogName= singleData.get("dialogName").toString();
+                                chatDialog.dialogPhoto = singleData.get("dialogPhoto").toString();
+                                chatDialog.id = singleData.get("id").toString();
+                                if(singleData.get("isTyping") !=null)
+                                chatDialog.isTyping = (boolean) singleData.get("isTyping");
+                                chatDialog.dialogName = singleData.get("dialogName").toString();
                                 chatDialog.users = (ArrayList<User>) singleData.get("users");
                                 //chatDialog.unreadCount = (int) singleData.get("unreadCount");
                                 chatDialog.lastMessage = (Message) singleData.get("lastMessage");
@@ -158,8 +158,8 @@ public class ChatRooms extends AppCompatActivity {
         dialogsListAdapter.setOnDialogClickListener(new DialogsListAdapter.OnDialogClickListener() {
             @Override
             public void onDialogClick(IDialog dialog) {
-                Intent intent = new Intent(ChatRooms.this,  ChatActivity.class);
-                intent.putExtra("Group_ID",dialog.getId());
+                Intent intent = new Intent(ChatRooms.this, ChatActivity.class);
+                intent.putExtra("Group_ID", dialog.getId());
                 startActivity(intent);
             }
 
@@ -175,12 +175,15 @@ public class ChatRooms extends AppCompatActivity {
         String pic;
         if(firebaseAuth.getCurrentUser().getPhotoUrl() == null){
 
-            chatDialog.dialogPhoto= "https://www.google.com.pk/url?sa=i&url=https%3A%2F%2Fcommons.wikimedia.org%2Fwiki%2FFile%3AMicrosoft_logo.svg&psig=AOvVaw3PrWg1jza_UoiOaOIkRo3u&ust=1623522034288000&source=images&cd=vfe&ved=0CAIQjRxqFwoTCMCg1oGZkPECFQAAAAAdAAAAABAD";
+            chatDialog.dialogPhoto= "https://www.designbust.com/download/1060/png/microsoft_logo_transparent512.png";
         }
         else{
         chatDialog.dialogPhoto= firebaseAuth.getCurrentUser().getPhotoUrl().toString();}
         chatDialog.unreadCount=0;
         chatDialog.lastMessage=null;
+        chatDialog.isTyping=false;
+        chatDialog.TyperID=null;
+        chatDialog.TyperName=null;
         chatDialog.users.add(currentUser);
 
         DocumentReference reference = db.collection("Groups").document();

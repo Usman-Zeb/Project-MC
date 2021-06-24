@@ -16,6 +16,17 @@ public class ChatDialog implements IDialog {
     public Message lastMessage;
     public int unreadCount;
 
+    public String TyperID;
+    public String TyperName;
+    public boolean isTyping;
+
+
+
+
+    public boolean getIsTyping(){return isTyping;}
+    public String getTyperName(){return TyperName;}
+
+    public String getTyperID(){return TyperID;}
     @Override
     public String getId() {
         return id;
@@ -59,6 +70,10 @@ public class ChatDialog implements IDialog {
         hashMap.put("users",users);
         hashMap.put("lastMessage", lastMessage);
         hashMap.put("unreadCount", unreadCount);
+        hashMap.put("isTyping", isTyping);
+        hashMap.put("TyperID", TyperID);
+        hashMap.put("TyperName", TyperName);
+
 
         return hashMap;
     }

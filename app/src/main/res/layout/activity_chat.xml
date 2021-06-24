@@ -14,14 +14,27 @@
         android:layout_above="@+id/input"
         />
 
+    <TextView
+        android:id="@+id/typing_indicator"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/input"
+        android:layout_below="@+id/messagesList"
+        android:paddingLeft="2dp"
+
+        android:layout_alignBottom="@+id/input"
+
+         />
+
     <com.stfalcon.chatkit.messages.MessageInput
         android:id="@+id/input"
         android:layout_width="match_parent"
+        android:layout_marginTop="5dp"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_marginBottom="5dp"
-        app:inputHint="@string/hint_enter_a_message"
-        app:layout_constraintBottom_toBottomOf="@+id/messagesList" />
+        app:showAttachmentButton="true"
+
+        app:inputHint="@string/hint_enter_a_message" />
 
 
 </RelativeLayout>

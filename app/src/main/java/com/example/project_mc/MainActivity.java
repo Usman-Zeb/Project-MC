@@ -29,6 +29,7 @@ public class MainActivity extends AppCompatActivity {
         //button = findViewById(R.id.loginRegister);
         handleLoginRegister();
 
+
     }
 
     public void handleLoginRegister(){

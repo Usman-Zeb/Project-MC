@@ -6,9 +6,11 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.project_mc.models.ChatDialog;
 import com.example.project_mc.models.Message;
@@ -32,6 +34,8 @@ import com.stfalcon.chatkit.dialogs.DialogsListAdapter;
 import com.stfalcon.chatkit.messages.MessageInput;
 import com.stfalcon.chatkit.messages.MessagesList;
 import com.stfalcon.chatkit.messages.MessagesListAdapter;
+
+import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -72,10 +76,19 @@ public class ChatActivity extends AppCompatActivity {
 
         messagesList = (MessagesList) findViewById(R.id.messagesList);
 
-        messagesListAdapter = new MessagesListAdapter<Message>(firebaseAuth.getUid().toString(), null);
+        messagesListAdapter = new MessagesListAdapter<Message>(firebaseAuth.getUid().toString(), new ImageLoader() {
+            @Override
+            public void loadImage(ImageView imageView, @Nullable String url, @Nullable Object payload) {
+                Picasso.get().load(url).into(imageView);
+            }
+        });
         inputView = findViewById(R.id.input);
         messagesList.setAdapter(messagesListAdapter);
         db = FirebaseFirestore.getInstance();
+
+
+        TextView typing_view = findViewById(R.id.typing_indicator);
+        typing_view.setVisibility(View.INVISIBLE);
 
 
         inputView.setInputListener(new MessageInput.InputListener() {
@@ -89,7 +102,7 @@ public class ChatActivity extends AppCompatActivity {
                 currentUser.put("id",firebaseAuth.getUid());
                 if(firebaseAuth.getCurrentUser().getPhotoUrl() == null){
 
-                    currentUser.put("avatar", "https://www.google.com.pk/url?sa=i&url=https%3A%2F%2Fcommons.wikimedia.org%2Fwiki%2FFile%3AMicrosoft_logo.svg&psig=AOvVaw3PrWg1jza_UoiOaOIkRo3u&ust=1623522034288000&source=images&cd=vfe&ved=0CAIQjRxqFwoTCMCg1oGZkPECFQAAAAAdAAAAABAD");
+                    currentUser.put("avatar", "https://www.designbust.com/download/1060/png/microsoft_logo_transparent512.png");
                 }
                 else{
                     currentUser.put("avatar", firebaseAuth.getCurrentUser().getPhotoUrl().toString());
@@ -102,11 +115,93 @@ public class ChatActivity extends AppCompatActivity {
                 return true;
             }
         });
+
+        inputView.setTypingListener(new MessageInput.TypingListener() {
+            @Override
+            public void onStartTyping() {
+                db.collection("Groups").document(group_id).update("isTyping", true
+                ,
+                        "TyperID", FirebaseAuth.getInstance().getCurrentUser().getUid()
+                , "TyperName", FirebaseAuth.getInstance().getCurrentUser().getDisplayName());
+
+
+            }
+
+            @Override
+            public void onStopTyping() {
+                db.collection("Groups").document(group_id).update("isTyping", false
+                        ,
+                        "TyperID", ""
+                , "TyperName", "");
+
+            }
+        });
+
+        inputView.setAttachmentsListener(new MessageInput.AttachmentsListener() {
+            @Override
+            public void onAddAttachments() {
+
+            }
+        });
 }
 
     @Override
     protected void onStart() {
         super.onStart();
+        TextView typingindicator_view = findViewById(R.id.typing_indicator);
+
+        db.collection("Groups").document(group_id).addSnapshotListener(new EventListener<DocumentSnapshot>() {
+            @Override
+            public void onEvent(@Nullable DocumentSnapshot value, @Nullable FirebaseFirestoreException error) {
+                if(value !=null)
+                {
+
+                    if(value.getData().get("isTyping") !=null)
+                    {
+                        boolean check_typing = (boolean) value.getData().get("isTyping");
+                        if(check_typing)
+                        {
+                            if(value.getData().get("TyperID") !=null)
+                            {
+                                Log.d("Bro","Is this working???????");
+                                String id = value.getData().get("TyperID").toString();
+                                if(id != FirebaseAuth.getInstance().getCurrentUser().getUid().toString())
+                                {
+                                    if(value.getData().get("TyperName") !=null){
+                                        String name = value.getData().get("TyperName").toString() + " is Typing...";
+                                        typingindicator_view.setText(name);
+                                    }
+                                    typingindicator_view.setVisibility(View.VISIBLE);
+
+                                }
+
+                                else
+                                {
+                                    typingindicator_view.setVisibility(View.INVISIBLE);
+                                }
+
+
+                            }
+                            else
+                            {
+                                typingindicator_view.setVisibility(View.INVISIBLE);
+                            }
+
+
+                        }
+                        else
+                        {
+                            typingindicator_view.setVisibility(View.INVISIBLE);
+                        }
+                    }
+                    else
+                    {
+                        typingindicator_view.setVisibility(View.INVISIBLE);
+                    }
+                }
+            }
+        });
+        
         CollectionReference messageRef = db.collection("Groups").document(group_id).collection("messages");
         messageRef.addSnapshotListener(new EventListener<QuerySnapshot>() {
             @Override
@@ -118,6 +213,7 @@ public class ChatActivity extends AppCompatActivity {
                 init_messages = new ArrayList<Message>();
                 if (value !=null)
                 {
+
                     for (DocumentSnapshot doc : value) {
                         {
                             Map<String, Object> newData = doc.getData();

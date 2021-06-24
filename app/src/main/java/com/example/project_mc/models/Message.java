@@ -1,20 +1,30 @@
 package com.example.project_mc.models;
 
+import android.media.Image;
 import android.util.Log;
+
+import androidx.annotation.Nullable;
 
 import com.stfalcon.chatkit.commons.models.IMessage;
 import com.stfalcon.chatkit.commons.models.IUser;
+import com.stfalcon.chatkit.commons.models.MessageContentType;
 
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Message implements IMessage {
+public class Message implements IMessage,
+        MessageContentType.Image {
 
     public String id;
     public String text;
     public User author = new User();
     public Date createdAt = new Date();
+
+    public MessageContentType.Image image;
+
+
+
 
     @Override
     public String getId() {
@@ -55,5 +65,11 @@ public class Message implements IMessage {
 
     public <T> Comparable<T> getDateTime() {
         return (Comparable<T>) this.createdAt;
+    }
+
+    @Nullable
+    @Override
+    public String getImageUrl() {
+        return image == null ? null : image.getImageUrl();
     }
 }
